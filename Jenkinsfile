@@ -4,7 +4,7 @@ pipeline {
 
     environment {
         // Change this to your Docker Hub username
-        DOCKERHUB_USERNAME = 'dockerhub-credentials'
+        DOCKERHUB_USERNAME = 'umed22'
     }
 
     stages {
