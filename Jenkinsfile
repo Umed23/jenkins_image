@@ -1,25 +1,37 @@
-// Jenkinsfile
+// Jenkinsfile (Corrected Version)
 pipeline {
-    agent any // Run on any available Jenkins agent
+    agent any
 
     environment {
-        // IMPORTANT: Change this to your Docker Hub username!
+        // Change this to your Docker Hub username
         DOCKERHUB_USERNAME = 'umed22'
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Umed23/jenkins_image.git'
+            }
+        }
+
         stage('Build Services') {
-            parallel { // Build both services at the same time
+            parallel {
                 stage('Build User Service') {
                     steps {
-                        echo "Building User Service..."
-                        docker.build("${umed22}/user-service:latest", './user-service')
+                        // WRAP THE COMMANDS IN A 'script' BLOCK
+                        script {
+                            echo "Building User Service..."
+                            docker.build("${DOCKERHUB_USERNAME}/user-service:latest", './user-service')
+                        }
                     }
                 }
                 stage('Build Order Service') {
                     steps {
-                        echo "Building Order Service..."
-                        docker.build("${umed22}/order-service:latest", './order-service')
+                        // WRAP THE COMMANDS IN A 'script' BLOCK
+                        script {
+                            echo "Building Order Service..."
+                            docker.build("${DOCKERHUB_USERNAME}/order-service:latest", './order-service')
+                        }
                     }
                 }
             }
@@ -27,11 +39,13 @@ pipeline {
 
         stage('Push Images to Docker Hub') {
             steps {
-                echo "Logging in and pushing images..."
-                // Use the credentials you stored in Jenkins
-                docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                    docker.image("${umed22}/user-service:latest").push()
-                    docker.image("${umed22}/order-service:latest").push()
+                // WRAP THE ENTIRE LOGIC IN A 'script' BLOCK
+                script {
+                    echo "Logging in and pushing images..."
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        docker.image("${DOCKERHUB_USERNAME}/user-service:latest").push()
+                        docker.image("${DOCKERHUB_USERNAME}/order-service:latest").push()
+                    }
                 }
             }
         }
@@ -40,13 +54,12 @@ pipeline {
             steps {
                 script {
                     echo "Stopping and removing old containers..."
-                    // '|| true' prevents the pipeline from failing if the containers don't exist yet
                     sh "docker stop user-service order-service || true"
                     sh "docker rm user-service order-service || true"
 
                     echo "Deploying new containers..."
-                    sh "docker run -d --name user-service -p 8080:3000 ${umed22}/user-service:latest"
-                    sh "docker run -d --name order-service -p 8081:3001 ${umed22}/order-service:latest"
+                    sh "docker run -d --name user-service -p 8080:3000 ${DOCKERHUB_USERNAME}/user-service:latest"
+                    sh "docker run -d --name order-service -p 8081:3001 ${DOCKERHUB_USERNAME}/order-service:latest"
                 }
             }
         }
