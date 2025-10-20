@@ -13,13 +13,13 @@ pipeline {
                 stage('Build User Service') {
                     steps {
                         echo "Building User Service..."
-                        docker.build("${DOCKERHUB_USERNAME}/user-service:latest", './user-service')
+                        docker.build("${umed22}/user-service:latest", './user-service')
                     }
                 }
                 stage('Build Order Service') {
                     steps {
                         echo "Building Order Service..."
-                        docker.build("${DOCKERHUB_USERNAME}/order-service:latest", './order-service')
+                        docker.build("${umed22}/order-service:latest", './order-service')
                     }
                 }
             }
@@ -30,8 +30,8 @@ pipeline {
                 echo "Logging in and pushing images..."
                 // Use the credentials you stored in Jenkins
                 docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                    docker.image("${DOCKERHUB_USERNAME}/user-service:latest").push()
-                    docker.image("${DOCKERHUB_USERNAME}/order-service:latest").push()
+                    docker.image("${umed22}/user-service:latest").push()
+                    docker.image("${umed22}/order-service:latest").push()
                 }
             }
         }
@@ -45,8 +45,8 @@ pipeline {
                     sh "docker rm user-service order-service || true"
 
                     echo "Deploying new containers..."
-                    sh "docker run -d --name user-service -p 8080:3000 ${DOCKERHUB_USERNAME}/user-service:latest"
-                    sh "docker run -d --name order-service -p 8081:3001 ${DOCKERHUB_USERNAME}/order-service:latest"
+                    sh "docker run -d --name user-service -p 8080:3000 ${umed22}/user-service:latest"
+                    sh "docker run -d --name order-service -p 8081:3001 ${umed22}/order-service:latest"
                 }
             }
         }
