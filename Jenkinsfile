@@ -50,16 +50,17 @@ pipeline {
             }
         }
 
-        stage('Deploy Services') {
+   stage('Deploy Services') {
             steps {
                 script {
                     echo "Stopping and removing old containers..."
-                    sh "docker stop user-service order-service || true"
-                    sh "docker rm user-service order-service || true"
+                    // Use 'bat' for Windows
+                    bat "docker stop user-service order-service || true"
+                    bat "docker rm user-service order-service || true"
 
                     echo "Deploying new containers..."
-                    sh "docker run -d --name user-service -p 8080:3000 ${DOCKERHUB_USERNAME}/user-service:latest"
-                    sh "docker run -d --name order-service -p 8081:3001 ${DOCKERHUB_USERNAME}/order-service:latest"
+                    bat "docker run -d --name user-service -p 8080:3000 ${DOCKERHUB_USERNAME}/user-service:latest"
+                    bat "docker run -d --name order-service -p 8081:3001 ${DOCKERHUB_USERNAME}/order-service:latest"
                 }
             }
         }
