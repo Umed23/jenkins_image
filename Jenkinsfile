@@ -53,10 +53,15 @@ pipeline {
   stage('Deploy Services') {
             steps {
                 script {
-                    echo "Stopping and removing old containers..."
-                    // Replace '|| true' with '|| rem' for Windows compatibility
-                    bat "docker stop user-service order-service || rem"
-                    bat "docker rm user-service order-service || rem"
+                    echo "Attempting to clean up old containers..."
+                    // Use a try-catch block to handle errors gracefully
+                    try {
+                        bat "docker stop user-service order-service"
+                        bat "docker rm user-service order-service"
+                    } catch (e) {
+                        // This block will run if the stop/rm commands fail
+                        echo "Containers did not exist. This is normal on the first run."
+                    }
 
                     echo "Deploying new containers..."
                     bat "docker run -d --name user-service -p 8080:3000 umed22/user-service:latest"
